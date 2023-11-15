@@ -1,0 +1,28 @@
+{
+  "name": "nodejs-aws-shop-be",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cdk:bootstrap": "npx cdk bootstrap aws://733858765927/eu-north-1 --profile AdministratorAccess-733858765927",
+    "cdk:deploy": "npx cdk deploy --profile AdministratorAccess-733858765927"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aleksey-Timoschenko/nodejs-aws-shop-be.git"
+  },
+  "author": "Timoschenko Aleksey",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Aleksey-Timoschenko/nodejs-aws-shop-be/issues"
+  },
+  "homepage": "https://github.com/Aleksey-Timoschenko/nodejs-aws-shop-be#readme",
+  "dependencies": {
+    "aws-cdk-lib": "^2.104.0"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.104.0",
+    "typescript": "^5.2.2"
+  }
+}
