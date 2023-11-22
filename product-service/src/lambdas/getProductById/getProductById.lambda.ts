@@ -19,7 +19,7 @@ export const handler = async (event: APIGatewayEvent) => {
             return getResponse({ statusCode: httpStatusCode.NOT_FOUND, message: productResponseMessages.NOT_FOUND });
         }
 
-        return getResponse<Product>({ statusCode: httpStatusCode.OK, body: product });
+        return getResponse<Product>({ statusCode: httpStatusCode.OK, body: product, headers: { "Content-Type": "application/json" } });
     } catch(error) {
         return getResponse({ statusCode: httpStatusCode.SERVER_ERROR, body: JSON.stringify({ error }) });
     }

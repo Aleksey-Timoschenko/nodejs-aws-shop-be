@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Swagger Petstore - OpenAPI 3.0",
-    "version": "1.0.11"
+    "title": "Shop project for AWS course",
+    "version": "1.0.0"
   },
   "servers": [
     {
@@ -23,14 +23,6 @@
             "description": "successful operation",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Product"
-                  }
-                }
-              },
-              "application/xml": {
                 "schema": {
                   "type": "array",
                   "items": {
@@ -74,11 +66,6 @@
                 "schema": {
                   "$ref": "#/components/schemas/Product"
                 }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/Product"
-                }
               }
             }
           },
@@ -113,6 +100,11 @@
             "example": "Product description 1"
           },
           "price": {
+            "type": "integer",
+            "format": "int64",
+            "example": 10
+          },
+          "count": {
             "type": "integer",
             "format": "int64",
             "example": 10
