@@ -36,6 +36,36 @@
             "description": "Internal error"
           }
         }
+      },
+      "post": {
+        "tags": [
+          "create product"
+        ],
+        "summary": "Add a new product to the store",
+        "description": "Add a new product to the store",
+        "operationId": "createProduct",
+        "requestBody": {
+          "description": "Create a new product in the store",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Product was successfully created"
+          },
+          "400": {
+            "description": "Product data is not valid"
+          },
+          "500": {
+            "description": "Internal error"
+          }
+        }
       }
     },
     "/products/{id}": {
@@ -91,6 +121,32 @@
             "type": "string",
             "example": 1
           },
+          "title": {
+            "type": "string",
+            "example": "Product 1"
+          },
+          "description": {
+            "type": "string",
+            "example": "Product description 1"
+          },
+          "price": {
+            "type": "integer",
+            "format": "int64",
+            "example": 10
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "example": 10
+          }
+        },
+        "xml": {
+          "name": "product"
+        }
+      },
+      "CreateProductDTO": {
+        "type": "object",
+        "properties": {
           "title": {
             "type": "string",
             "example": "Product 1"

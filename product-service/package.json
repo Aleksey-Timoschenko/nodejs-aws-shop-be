@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "cdk:bootstrap": "npx cdk bootstrap aws://733858765927/eu-north-1 --profile AdministratorAccess-733858765927",
-    "cdk:deploy": "npx cdk deploy --profile AdministratorAccess-733858765927"
+    "cdk:deploy": "npx cdk deploy --profile AdministratorAccess-733858765927",
+    "seed:products": "node --loader ts-node/esm ./seeds/products-populate.ts"
   },
   "repository": {
     "type": "git",
@@ -21,15 +22,22 @@
   "dependencies": {
     "@aws-cdk/aws-apigatewayv2-alpha": "^2.110.0-alpha.0",
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.110.0-alpha.0",
+    "@aws-sdk/client-dynamodb": "^3.454.0",
+    "@aws-sdk/util-dynamodb": "^3.454.0",
     "aws-cdk-lib": "^2.104.0",
+    "aws-sdk": "^2.1501.0",
+    "dotenv": "^16.3.1",
     "path": "^0.12.7",
     "ts-jest": "^29.1.1",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.121",
     "@types/jest": "^29.5.8",
     "@types/lambda-tester": "^4.0.3",
+    "@types/node": "^20.9.4",
+    "@types/uuid": "^9.0.7",
     "aws-cdk": "^2.104.0",
     "jest": "^29.7.0",
     "lambda-tester": "^4.0.1",
