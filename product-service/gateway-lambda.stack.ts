@@ -37,8 +37,8 @@ export class GatewayLambda extends cdk.Stack {
      /** Creating createProduct Lambda */
      let createProductLambda = this.createProductLambda();
 
-    const productsTable = TableV2.fromTableName(this, 'productsTable', options.productsTableName)
-    const stocksTable = TableV2.fromTableName(this, 'stocksTable', options.stocksTableName)
+    const productsTable = this.getProductsTable(options.productsTableName)
+    const stocksTable = this.getStocksTable(options.stocksTableName)
 
     /* Grant read access */
     productsTable.grantReadData(productsListLambda);
@@ -58,6 +58,31 @@ export class GatewayLambda extends cdk.Stack {
     new cdk.CfnOutput(this, "apiUrl", { value: lambdaHttpApi.url ?? '' });
   }
 
+  /**
+   * Get products table
+   *
+   * @private
+   * @param {string} tableName
+   * @return {*}  {cdk.aws_dynamodb.ITableV2}
+   */
+  private getProductsTable(tableName: string): cdk.aws_dynamodb.ITableV2 {
+    // Get already created table
+    // Or you can create your own table here
+    return TableV2.fromTableName(this, 'productsTable', tableName)
+  }
+
+  /**
+   * Get stocks table
+   *
+   * @private
+   * @param {string} tableName
+   * @return {*}  {cdk.aws_dynamodb.ITableV2}
+   */
+   private getStocksTable(tableName: string): cdk.aws_dynamodb.ITableV2 {
+    // Get already created table
+    // Or you can create your own table here
+    return TableV2.fromTableName(this, 'stocksTable', tableName)
+  }
 
   /**
    * Creating getProductsList Lambda
