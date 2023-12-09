@@ -5,9 +5,10 @@ import { GatewayLambda } from './gateway-lambda.stack';
 
 const app = new cdk.App();
 
-new GatewayLambda(app, 'product-service-stack', {
-    productsTableName: process.env.PRODUCTS_TABLE_NAME,
-    stocksTableName: process.env.STOCKS_TABLE_NAME
+new GatewayLambda(app, 'import-service-stack', {
+    filesBucketName: process.env.BUCKET_NAME_FOR_FILES,
+    uploadedFilesFolderName: process.env.UPLOADED_FILES_FOLDER_NAME,
+    parsedFilesFolderName: process.env.PARSED_FILES_FOLDER_NAME,
 }, {
     env :{
         // account: process.env.CDK_DEFAULT_ACCOUNT, 
