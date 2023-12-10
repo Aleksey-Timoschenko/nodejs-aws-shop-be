@@ -5,9 +5,9 @@ export const validateRequestBody = (body: CreateProductDTO): boolean => {
 
     if (body.description && typeof body.title !== 'string') return false
 
-    if (body.price && typeof body.price !== 'number') return false
+    if (body.price && typeof Number(body.price) !== 'number') return false
 
-    if (body.count && typeof body.count !== 'number') return false
+    if (body.count && typeof Number(body.count) !== 'number') return false
 
     return true
 }

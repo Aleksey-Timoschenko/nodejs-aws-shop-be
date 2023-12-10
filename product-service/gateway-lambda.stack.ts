@@ -16,10 +16,12 @@ export class GatewayLambda extends cdk.Stack {
   readonly region: string;
   readonly productsTableName: string;
   readonly stocksTableName: string;
+  readonly createProductTopicARN: string;
 
   readonly getProductsListLambdaPath = './src/lambdas/getProductsList/getProductsList.lambda.ts'
   readonly getProductByIdLambdaPath = './src/lambdas/getProductById/getProductById.lambda.ts'
   readonly createProductLambdaPath = './src/lambdas/createProduct/createProduct.lambda.ts'
+  readonly catalogBatchProcessLambdaPath = './src/lambdas/catalogBatchProcess/catalogBatchProcess.lambda.ts'
 
   constructor(scope: Construct, id: string, options: any, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -28,28 +30,72 @@ export class GatewayLambda extends cdk.Stack {
     this.productsTableName = options.productsTableName
     this.stocksTableName = options.stocksTableName  
 
+    /** Creating catalogItemsQueue */
+    const catalogItemsQueue = this.getCatalogItemsQueue();
+
+    /** Creating createProductTopic */
+    const createProductTopic = this.getCreateProductTopic();
+    this.createProductTopicARN = createProductTopic.topicArn;
+
     /** Creating getProductsList Lambda */
     let productsListLambda = this.getProductsListLambda();
 
     /** Creating getProductById Lambda */
     let productByIdLambda = this.getProductByIdLambda();
 
-     /** Creating createProduct Lambda */
-     let createProductLambda = this.createProductLambda();
+    /** Creating createProduct Lambda */
+    let createProductLambda = this.createProductLambda();
 
+    /** Creating catalogBatchProcess Lambda */
+    let catalogBatchProcess = this.catalogBatchProcess();
+
+    /* Grant permission to execute others lambdas */
+    catalogBatchProcess.addToRolePolicy(new cdk.aws_iam.PolicyStatement({
+      actions: ['lambda:InvokeFunction'],
+      resources: ['*']
+    }))
+
+    /** Get products | stocks tables */
     const productsTable = this.getProductsTable(options.productsTableName)
     const stocksTable = this.getStocksTable(options.stocksTableName)
 
-    /* Grant read access */
+    /* Grant read access for tables */
     productsTable.grantReadData(productsListLambda);
     stocksTable.grantReadData(productsListLambda);
 
     productsTable.grantReadData(productByIdLambda);
     stocksTable.grantReadData(productByIdLambda);
 
-    /* Grant write access */
+    /* Grant write access for tables */
     productsTable.grantWriteData(createProductLambda);
     stocksTable.grantWriteData(createProductLambda);
+
+    /* Attach lambdas to catalogBatchProcess */
+    catalogBatchProcess.addEventSource(new cdk.aws_lambda_event_sources.SqsEventSource(catalogItemsQueue, {
+      batchSize: 5
+    }))
+
+    /* Grant access to publish notifications to createProductTopic*/
+    createProductTopic.grantPublish(catalogBatchProcess)
+
+    /* Create a subscription for createProductTopic to get all messages */
+    new cdk.aws_sns.Subscription(this, 'create-product-subscription-all', {
+      endpoint: options.emailForAllNotifications,
+      protocol: cdk.aws_sns.SubscriptionProtocol.EMAIL,
+      topic: createProductTopic,
+    })
+
+    /* Create a subscription for createProductTopic to get filtered messages by count field */
+    new cdk.aws_sns.Subscription(this, 'create-product-subscription-filtered', {
+      endpoint: options.emailForFilteredNotifications,
+      protocol: cdk.aws_sns.SubscriptionProtocol.EMAIL,
+      topic: createProductTopic,
+      filterPolicy: {
+        count: cdk.aws_sns.SubscriptionFilter.numericFilter({
+          lessThan: 10,
+        }),
+      }
+    })
     
     /** Creating Lambda HTTP API, which integrates Endpoint to Lambda */
     let lambdaHttpApi = this.createHttpApi(productsListLambda, productByIdLambda, createProductLambda);
@@ -170,6 +216,59 @@ export class GatewayLambda extends cdk.Stack {
       memorySize: 128,
       timeout: cdk.Duration.seconds(5),
     });
+  }
+
+  /**
+   * Creating catalogBatchProcess Lambda
+   *
+   * @private
+   * @return {*}  {cdk.aws_lambda.IFunction}
+   */
+  private catalogBatchProcess(): cdk.aws_lambda.IFunction {
+    return new cdk.aws_lambda_nodejs.NodejsFunction(this, "catalog-batch-process", {
+      runtime: cdk.aws_lambda.Runtime.NODEJS_18_X,
+      bundling: {
+        sourceMap: true,
+        minify: true,
+      },
+      description: 'Catalog batch process Lambda',
+      functionName: 'catalogBatchProcess',
+      entry: this.catalogBatchProcessLambdaPath,
+      environment: {
+        NODE_OPTIONS: '--enable-source-maps',
+        PRODUCT_AWS_REGION: this.region,
+        PRODUCTS_TABLE_NAME: this.productsTableName,
+        STOCKS_TABLE_NAME: this.stocksTableName,
+        CREATE_PRODUCT_LAMBDA_NAME: 'createProduct',
+        CREATE_PRODUCT_SNS_TOPIC_ARN: this.createProductTopicARN,
+      },
+      logRetention: cdk.aws_logs.RetentionDays.ONE_DAY,
+      // Default value
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(5),
+    });
+  }
+
+  /**
+   * Creating catalogItems Queue
+   *
+   * @private
+   * @return {*}  {cdk.aws_sqs.Queue}
+   */
+  private getCatalogItemsQueue(): cdk.aws_sqs.Queue {
+    return new cdk.aws_sqs.Queue(this, 'catalog-items-queue', {
+      queueName: 'catalogItemsQueue',
+    })
+  }
+
+  /**
+   * Creating createProductTopic Topic
+   *
+   * @private
+   * @return {*}  {cdk.aws_sqs.Queue}
+   */
+   private getCreateProductTopic(): cdk.aws_sns.Topic {
+    return new cdk.aws_sns.Topic(this, 'create-product-topic', { topicName: 'createProductTopic' })
   }
 
   /**

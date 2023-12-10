@@ -7,4 +7,5 @@ export enum httpStatusCode {
 
 export const importResponseMessages = {
     FILE_NAME_NOT_VALID: 'File name is not provided',
+    FILE_EXTENSION_NOT_VALID: 'File is not in csv format',
 }
