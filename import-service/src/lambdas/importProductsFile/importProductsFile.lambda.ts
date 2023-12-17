@@ -19,6 +19,12 @@ export const handler = async (event: APIGatewayEvent) => {
             return getResponse({ statusCode: httpStatusCode.BAD_REQUEST, body: importResponseMessages.FILE_NAME_NOT_VALID })
         }
 
+        const fileExtension = fileName.split('.').reverse()[0]
+
+        if (fileExtension !== 'csv') {
+            return getResponse({ statusCode: httpStatusCode.BAD_REQUEST, body: importResponseMessages.FILE_EXTENSION_NOT_VALID })
+        }
+
         // Get signed url for uploading files to s3 bucket
         const signedUrlKey = `uploaded/${fileName}`
         const signedURL = getSignedUrl('putObject', process.env.BUCKET_NAME_FOR_FILES, signedUrlKey)

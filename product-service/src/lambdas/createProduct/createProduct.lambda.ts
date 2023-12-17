@@ -24,7 +24,7 @@ export const handler = async (event: APIGatewayEvent) => {
             return getResponse({ statusCode: httpStatusCode.BAD_REQUEST, body: productResponseMessages.PRODUCT_DATA_NOT_VALID });
         }
 
-        const requestBody: CreateProductDTO = JSON.parse(event.body)
+        const requestBody: CreateProductDTO = typeof event.body === 'string' ? JSON.parse(event.body) : event.body
 
         // Body validation
         // It's better to implement validation within api gateway, but http api gateway is used 
@@ -42,11 +42,11 @@ export const handler = async (event: APIGatewayEvent) => {
             id: newProductId,
             title: requestBody?.title ?? '',
             description: requestBody?.description ?? '',
-            price: requestBody?.price ?? 0,
+            price: Number(requestBody?.price) ?? 0,
         }
         const newStock: StockModel = { 
             product_id: newProductId, 
-            count: requestBody?.count ?? 0  
+            count: Number(requestBody?.count) ?? 0  
         }
 
         const transactionParams = {
@@ -74,6 +74,8 @@ export const handler = async (event: APIGatewayEvent) => {
 
         return getResponse({ statusCode: httpStatusCode.OK, body: productResponseMessages.PRODUCT_SUCCESSFULLY_CREATED })
     } catch(error) {
+        console.log('Create product error: ', error);
+        
         return getResponse({ statusCode: httpStatusCode.SERVER_ERROR, body: JSON.stringify({ error }) })
     }
 }

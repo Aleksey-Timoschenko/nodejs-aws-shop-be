@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3notifications from "aws-cdk-lib/aws-s3-notifications";
+import * as sqs from "aws-cdk-lib/aws-sqs";
 import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 import { HttpApi, HttpMethod, CorsHttpMethod } from "@aws-cdk/aws-apigatewayv2-alpha";
 
@@ -18,6 +19,7 @@ export class GatewayLambda extends cdk.Stack {
   readonly filesBucketName: string;
   readonly uploadedFilesFolderName: string;
   readonly parsedFilesFolderName: string;
+  readonly catalogItemsQueueURL: string;
 
   readonly importProductsFileLambdaPath = './src/lambdas/importProductsFile/importProductsFile.lambda.ts'
   readonly importFileParserLambdaPath = './src/lambdas/importFileParser/importFileParser.lambda.ts'
@@ -32,6 +34,10 @@ export class GatewayLambda extends cdk.Stack {
 
     const filesBucket = this.getS3BucketForFiles()
     
+    /** Get catalogItemsQueue */
+    const catalogItemsQueue = this.getCatalogItemsQueue(options.catalogItemsQueueARN);
+    this.catalogItemsQueueURL = catalogItemsQueue.queueUrl
+
     /** Creating importProductsFile Lambda */
     const importProductsFileLambda = this.getImportProductsFileLambda();
 
@@ -44,6 +50,9 @@ export class GatewayLambda extends cdk.Stack {
 
     /* Grant delete access to bucket */
     filesBucket.grantDelete(importFileParserLambda)
+
+    /* Grant send messages to catalogItemsQueue */
+    catalogItemsQueue.grantSendMessages(importFileParserLambda)
 
     /* Add event notifications to lambda function */
     filesBucket.addEventNotification(
@@ -125,12 +134,26 @@ export class GatewayLambda extends cdk.Stack {
         BUCKET_NAME_FOR_FILES: this.filesBucketName,
         UPLOADED_FILES_FOLDER_NAME: this.uploadedFilesFolderName,
         PARSED_FILES_FOLDER_NAME: this.parsedFilesFolderName,
+        CATALOG_ITEMS_QUEUE_URL: this.catalogItemsQueueURL,
       },
       logRetention: cdk.aws_logs.RetentionDays.ONE_DAY,
       // Default value
       memorySize: 128,
       timeout: cdk.Duration.seconds(5),
     });
+  }
+
+ /**
+   * Creating importFileParser Lambda
+   *
+   * @private
+   * @param {string} queueArn
+   * @return {*}  {cdk.aws_lambda.IFunction}
+   */
+  private getCatalogItemsQueue(queueArn: string): sqs.IQueue {
+    return sqs.Queue.fromQueueAttributes(this, 'catalog-items-queue-for-import', { 
+      queueArn
+    })
   }
 
   /**
