@@ -16,6 +16,7 @@ dist-ssr
 
 cdk.out
 .env
+.env-auth
 
 # Editor directories and files
 .vscode/*

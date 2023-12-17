@@ -2,7 +2,7 @@ import { S3Event } from 'aws-lambda';
 import S3 from "aws-sdk/clients/s3";
 import SQS from 'aws-sdk/clients/sqs'
 
-import { parseS3CSVObjectStream } from '../../../shared/utils/s3Utils'
+import { parseS3CSVObjectStream } from '../../shared/utils/s3Utils'
 
 const s3 = new S3({
     region: process?.env?.PRODUCT_AWS_REGION || 'eu-north-1',

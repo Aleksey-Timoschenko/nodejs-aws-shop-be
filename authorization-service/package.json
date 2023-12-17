@@ -1,5 +1,5 @@
 {
-  "name": "import-service",
+  "name": "authorization-service",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,13 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-cdk/aws-apigatewayv2-alpha": "^2.114.1-alpha.0",
-    "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.114.1-alpha.0",
-    "@aws-cdk/aws-apigatewayv2-authorizers-alpha": "^2.114.1-alpha.0",
-    "@aws-cdk/aws-lambda-event-sources": "^1.204.0",
     "aws-cdk-lib": "^2.104.0",
-    "aws-sdk": "^2.1501.0",
-    "csv-parser": "^3.0.0",
     "dotenv": "^16.3.1",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1"

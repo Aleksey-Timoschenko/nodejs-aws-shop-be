@@ -1,9 +1,9 @@
 import { APIGatewayEvent } from 'aws-lambda';
 import S3 from "aws-sdk/clients/s3";
 
-import { getResponse } from '../../../shared/utils/httpUtils'
-import { httpStatusCode, importResponseMessages } from '../../../shared/constants/httpConstants'
-import { getSignedUrl } from '../../../shared/utils/s3Utils';
+import { getResponse } from '../../shared/utils/httpUtils'
+import { httpStatusCode, importResponseMessages } from '../../shared/constants/httpConstants'
+import { getSignedUrl } from '../../shared/utils/s3Utils';
 
 const s3 = new S3({
     region: process?.env?.PRODUCT_AWS_REGION || 'eu-north-1',
