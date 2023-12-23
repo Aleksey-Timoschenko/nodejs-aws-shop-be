@@ -1,6 +1,6 @@
 import { S3Event } from 'aws-lambda';
 
-import * as s3Utils from '../../../shared/utils/s3Utils'
+import * as s3Utils from '../../shared/utils/s3Utils'
 import { handler } from './importFileParser.lambda'
 
 describe('Tests for importFileParser lambda', () => {

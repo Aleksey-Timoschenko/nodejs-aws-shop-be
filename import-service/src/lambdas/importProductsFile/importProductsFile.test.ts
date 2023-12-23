@@ -1,8 +1,8 @@
 import lambdaTester from 'lambda-tester'
 
-import { httpStatusCode, importResponseMessages } from '../../../shared/constants/httpConstants'
-import { HttpResponse } from '../../../shared/interfaces/httpInterfaces'
-import * as s3Utils from '../../../shared/utils/s3Utils'
+import { httpStatusCode, importResponseMessages } from '../../shared/constants/httpConstants'
+import { HttpResponse } from '../../shared/interfaces/httpInterfaces'
+import * as s3Utils from '../../shared/utils/s3Utils'
 import { handler } from './importProductsFile.lambda'
 
 describe('Tests for importProductsFile lambda', () => {

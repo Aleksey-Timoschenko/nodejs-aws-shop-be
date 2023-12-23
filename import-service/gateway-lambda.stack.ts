@@ -2,10 +2,13 @@ import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3notifications from "aws-cdk-lib/aws-s3-notifications";
 import * as sqs from "aws-cdk-lib/aws-sqs";
+import { HttpLambdaAuthorizer, HttpLambdaResponseType } from '@aws-cdk/aws-apigatewayv2-authorizers-alpha';
 import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 import { HttpApi, HttpMethod, CorsHttpMethod } from "@aws-cdk/aws-apigatewayv2-alpha";
+import { Duration } from 'aws-cdk-lib/core';
 
 import { Construct } from "constructs";
+import { PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 
 /**
  * Stack, which creates LambdaHttpApi Gateway
@@ -20,6 +23,7 @@ export class GatewayLambda extends cdk.Stack {
   readonly uploadedFilesFolderName: string;
   readonly parsedFilesFolderName: string;
   readonly catalogItemsQueueURL: string;
+  readonly authorizerARN: string;
 
   readonly importProductsFileLambdaPath = './src/lambdas/importProductsFile/importProductsFile.lambda.ts'
   readonly importFileParserLambdaPath = './src/lambdas/importFileParser/importFileParser.lambda.ts'
@@ -31,6 +35,7 @@ export class GatewayLambda extends cdk.Stack {
     this.filesBucketName = options?.filesBucketName ?? 'rs-site-aws-files-bucket'
     this.uploadedFilesFolderName = options?.uploadedFilesFolderName ?? 'uploaded'
     this.parsedFilesFolderName = options?.parsedFilesFolderName ?? 'parsed'
+    this.authorizerARN = options.authorizerARN
 
     const filesBucket = this.getS3BucketForFiles()
     
@@ -183,10 +188,19 @@ export class GatewayLambda extends cdk.Stack {
       importProductsFileLambda
     );
 
+    /* Create lambda authorizer */
+    const authHandler = cdk.aws_lambda_nodejs.NodejsFunction.fromFunctionArn(this, 'import-file-authorization', this.authorizerARN)
+
+    const authorizer = new HttpLambdaAuthorizer('import-api-authorizer', authHandler, {
+      responseTypes: [HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response,
+      resultsCacheTtl: Duration.seconds(0)
+    });
+
     httpApi.addRoutes({
         path: '/import',
         methods: [ HttpMethod.GET ],
         integration: importProductsFileIntegration,
+        authorizer
     })
 
     return httpApi
