@@ -54,7 +54,7 @@ export class AppService {
       const result = firstValueFrom(response);
 
       if (needToUseCache) {
-        await this.cacheManager.set('products', await result);
+        await this.cacheManager.set('products', await result, 120000);
       }
 
       return result;
